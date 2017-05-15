@@ -56,13 +56,8 @@ public class MainActivity extends AppCompatActivity {
 
         apiService = ApiClient.getInstance().create(ApiInterface.class);
 
-        fab.setOnClickListener(view -> showInputDialog());
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         showInputDialog();
+        fab.setOnClickListener(view -> showInputDialog());
     }
 
     private void showInputDialog() {

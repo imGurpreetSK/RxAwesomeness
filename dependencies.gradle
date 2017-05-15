@@ -18,6 +18,7 @@ ext {
     rxJavaAdapterVer = "2.0.2"
     gsonConverterVer = "2.0.0"
     retroLambdaVer = "3.2.0"
+    picassoVer = "2.5.2"
 
     //testing libraries
     espressoVer = "2.2.2"

@@ -65,5 +65,4 @@
             android:layout_marginStart="@dimen/margin_4dp"
             android:textSize="@dimen/text_tiny"/>
     </LinearLayout>
-
 </LinearLayout>

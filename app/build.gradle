@@ -19,7 +19,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    dataBinding{
+    dataBinding {
         enabled true
     }
     compileOptions {
@@ -58,4 +58,5 @@ dependencies {
     //misc
     compile "com.afollestad.material-dialogs:core:$materialDialogVer"
 
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }

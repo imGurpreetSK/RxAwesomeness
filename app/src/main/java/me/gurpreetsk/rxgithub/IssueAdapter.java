@@ -1,11 +1,19 @@
 package me.gurpreetsk.rxgithub;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.List;
 
@@ -48,12 +56,31 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
         holder.textviewIssueUserUrl.setText(String.format("%s: %s", "Url",
                 issues.get(holder.getAdapterPosition()).getUser().getUrl()));
         holder.textviewIssueUrl.setText(issues.get(holder.getAdapterPosition()).getUrl());
+//        Picasso.with(context)
+//                .load(issues.get(holder.getAdapterPosition()).getUser().getAvatarUrl())
+//                .into(holder.imageviewUser);
+        holder.issueLayout.setOnClickListener(v -> {
+            new MaterialDialog.Builder(context)
+                    .content(R.string.open_in_browser)
+                    .positiveText(R.string.open)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW)
+                                    .setData(Uri.parse(issues.get(holder.getAdapterPosition()).getHtmlUrl()));
+                            context.startActivity(intent);
+                        }
+                    })
+                    .negativeText(android.R.string.no)
+                    .show();
+        });
     }
 
     @Override
     public int getItemCount() {
         return issues.size();
     }
+
 
     class IssueViewHolder extends RecyclerView.ViewHolder {
 
@@ -69,6 +96,8 @@ public class IssueAdapter extends RecyclerView.Adapter<IssueAdapter.IssueViewHol
         TextView textviewIssueUser;
         @BindView(R.id.textview_issue_user_url)
         TextView textviewIssueUserUrl;
+        @BindView(R.id.issue_layout)
+        LinearLayout issueLayout;
 
         IssueViewHolder(View itemView) {
             super(itemView);
