@@ -1,7 +1,10 @@
 package me.gurpreetsk.rxgithub;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +22,14 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Manifest;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import me.gurpreetsk.rxgithub.model.Issue;
 import me.gurpreetsk.rxgithub.rest.ApiClient;
 import me.gurpreetsk.rxgithub.rest.ApiInterface;
+import me.gurpreetsk.rxgithub.utils.EndlessRecyclerViewScrollListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,7 +47,10 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab)
     FloatingActionButton fab;
 
+    int pageNumber = 1;
+
     ApiInterface apiService;
+    SharedPreferences preferences;
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -53,11 +61,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-
+        preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         apiService = ApiClient.getInstance().create(ApiInterface.class);
 
         showInputDialog();
         fab.setOnClickListener(view -> showInputDialog());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+//        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
+//            @Override
+//            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+//                fetchData(preferences.getString("org", ""), preferences.getString("repo", ""),
+//                        ++pageNumber, null);
+//            }
+//        });
     }
 
     private void showInputDialog() {
@@ -73,33 +90,13 @@ public class MainActivity extends AppCompatActivity {
                                 .cancelable(false)
                                 .show();
                         try {
-                            String org = input.toString().trim().split("/")[0];
-                            String repo = input.toString().trim().split("/")[1];
-                            Observable<List<Issue>> issueObservable = apiService.getIssues(org, repo);
-                            issueObservable.subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .map(issues -> issues)
-                                    .subscribe(new Subscriber<List<Issue>>() {
-                                        @Override
-                                        public void onCompleted() {
-                                            Log.i(TAG, "onCompleted: COMPLETED!");
-                                            progressDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable e) {
-                                            Log.e(TAG, "onError: ", e);
-                                            Toast.makeText(MainActivity.this, "No such repository found",
-                                                    Toast.LENGTH_SHORT).show();
-                                            progressDialog.dismiss();
-                                        }
-
-                                        @Override
-                                        public void onNext(List<Issue> issues) {
-                                            recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues));
-                                            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                                        }
-                                    });
+                            String org = input.toString().toLowerCase().trim().split("/")[0];
+                            String repo = input.toString().toLowerCase().trim().split("/")[1];
+                            preferences.edit()
+                                    .putString("org", org)
+                                    .putString("repo", repo)
+                                    .apply();
+                            fetchData(org, repo, pageNumber, progressDialog);
                         } catch (Exception e) {
                             e.printStackTrace();
                             Toast.makeText(MainActivity.this, "Please check the input",
@@ -108,6 +105,36 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }).show();
+    }
+
+    private void fetchData(String org, String repo, int pageNumber, @Nullable MaterialDialog dialog) {
+        Log.i(TAG, "fetchData: " + pageNumber);
+        Observable<List<Issue>> issueObservable = apiService.getIssues(org, repo, pageNumber);
+        issueObservable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(issues -> issues)
+                .subscribe(new Subscriber<List<Issue>>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.i(TAG, "onCompleted: COMPLETED!");
+                        if (dialog != null)
+                            dialog.dismiss();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "onError: ", e);
+                        Toast.makeText(MainActivity.this, "No such repository found",
+                                Toast.LENGTH_SHORT).show();
+                        if (dialog != null)
+                            dialog.dismiss();
+                    }
+
+                    @Override
+                    public void onNext(List<Issue> issues) {
+                        recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues));
+                    }
+                });
     }
 
     @Override
