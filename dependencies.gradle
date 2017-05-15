@@ -17,6 +17,7 @@ ext {
     materialDialogVer = "0.9.4.4"
     rxJavaAdapterVer = "2.0.2"
     gsonConverterVer = "2.0.0"
+    retroLambdaVer = "3.2.0"
 
     //testing libraries
     espressoVer = "2.2.2"
