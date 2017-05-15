@@ -1,5 +1,6 @@
 package me.gurpreetsk.rxgithub;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            startActivity(new Intent(MainActivity.this, CreditsActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
