@@ -3,8 +3,23 @@ apply plugin: 'me.tatarka.retrolambda'
 
 
 android {
+    signingConfigs {
+        signing_config {
+            keyAlias 'key0'
+            keyPassword 'doctalk'
+            storeFile file("$rootDir/app/keystore.jks")
+            storePassword 'doctalk'
+        }
+    }
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
+    dataBinding {
+        enabled true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     defaultConfig {
         applicationId "me.gurpreetsk.rxgithub"
         minSdkVersion minSdkVer
@@ -17,31 +32,23 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.signing_config
         }
-    }
-    dataBinding {
-        enabled true
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile("com.android.support.test.espresso:espresso-core:$espressoVer", {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile "junit:junit:$junitVer"
-
     compile "com.android.support:appcompat-v7:$supportLibVer"
     compile "com.android.support.constraint:constraint-layout:$coordinatorLayoutVer"
     compile "com.android.support:recyclerview-v7:$supportLibVer"
     compile "com.android.support:design:$supportLibVer"
     compile "com.android.support:support-v4:$supportLibVer"
     compile "com.android.support:cardview-v7:$supportLibVer"
-
     //external dependencies
     //retrofit
     compile "com.google.code.gson:gson:$gsonVer"
@@ -57,6 +64,5 @@ dependencies {
     compile "com.squareup.retrofit2:converter-gson:$gsonConverterVer"
     //misc
     compile "com.afollestad.material-dialogs:core:$materialDialogVer"
-
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
