@@ -1,6 +1,7 @@
 package me.gurpreetsk.rxgithub;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
+
+    ApiInterface apiService;
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -46,33 +54,65 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        ApiInterface apiService = ApiClient.getInstance().create(ApiInterface.class);
-        Observable<List<Issue>> issueObservable = apiService.getIssues("square", "retrofit");
-        issueObservable.subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(issues -> issues)
-                .subscribe(new Subscriber<List<Issue>>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.i(TAG, "onCompleted: COMPLETED!");
-                    }
+        apiService = ApiClient.getInstance().create(ApiInterface.class);
 
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: ", e);
-                    }
+        fab.setOnClickListener(view -> showInputDialog());
+    }
 
-                    @Override
-                    public void onNext(List<Issue> issues) {
-                        recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues));
-                        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                    }
-                });
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showInputDialog();
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(view ->
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show());
+    private void showInputDialog() {
+        new MaterialDialog.Builder(this)
+                .title(R.string.enter_full_repo_name)
+                .content(R.string.empty)
+                .input(R.string.example_repo, R.string.empty, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                        MaterialDialog progressDialog = new MaterialDialog.Builder(MainActivity.this)
+                                .content(R.string.fetching_data)
+                                .progress(true, 0)
+                                .cancelable(false)
+                                .show();
+                        try {
+                            String org = input.toString().trim().split("/")[0];
+                            String repo = input.toString().trim().split("/")[1];
+                            Observable<List<Issue>> issueObservable = apiService.getIssues(org, repo);
+                            issueObservable.subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .map(issues -> issues)
+                                    .subscribe(new Subscriber<List<Issue>>() {
+                                        @Override
+                                        public void onCompleted() {
+                                            Log.i(TAG, "onCompleted: COMPLETED!");
+                                            progressDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            Log.e(TAG, "onError: ", e);
+                                            Toast.makeText(MainActivity.this, "No such repository found",
+                                                    Toast.LENGTH_SHORT).show();
+                                            progressDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void onNext(List<Issue> issues) {
+                                            recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues));
+                                            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                                        }
+                                    });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(MainActivity.this, "Please check the input",
+                                    Toast.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
+                        }
+                    }
+                }).show();
     }
 
     @Override
