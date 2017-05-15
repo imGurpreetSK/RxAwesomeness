@@ -1,0 +1,25 @@
+ext {
+    gradleVer = "2.3.0"
+    compileSdkVer = 25
+    buildToolsVer = "25.0.2"
+    minSdkVer = 15
+    targetSdkVer = 25
+
+    //dependencies
+    supportLibVer = "25.3.1"
+    coordinatorLayoutVer = "1.0.2"
+    retrofitVer = "2.0.2"
+    gsonVer = "2.6.2"
+    butterknifeVer = "8.5.1"
+    materialEditTextVer = "2.1.4"
+    rxJavaVer = "1.1.6"
+    rxAndroidVer = "1.2.1"
+    materialDialogVer = "0.9.4.4"
+    rxJavaAdapterVer = "2.0.2"
+    gsonConverterVer = "2.0.0"
+
+    //testing libraries
+    espressoVer = "2.2.2"
+    junitVer = "4.12"
+
+}

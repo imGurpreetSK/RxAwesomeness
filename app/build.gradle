@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+
+
+android {
+    compileSdkVersion compileSdkVer
+    buildToolsVersion buildToolsVer
+    defaultConfig {
+        applicationId "me.gurpreetsk.rxgithub"
+        minSdkVersion minSdkVer
+        targetSdkVersion targetSdkVer
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    dataBinding{
+        enabled true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile("com.android.support.test.espresso:espresso-core:$espressoVer", {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile "junit:junit:$junitVer"
+
+    compile "com.android.support:appcompat-v7:$supportLibVer"
+    compile "com.android.support.constraint:constraint-layout:$coordinatorLayoutVer"
+    compile "com.android.support:recyclerview-v7:$supportLibVer"
+    compile "com.android.support:design:$supportLibVer"
+    compile "com.android.support:support-v4:$supportLibVer"
+
+    //external dependencies
+    //retrofit
+    compile "com.google.code.gson:gson:$gsonVer"
+    compile "com.squareup.retrofit2:retrofit:$retrofitVer"
+    compile "com.squareup.retrofit2:converter-gson:$retrofitVer"
+    //butterknife
+    compile "com.jakewharton:butterknife:$butterknifeVer"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$butterknifeVer"
+    //rx
+    compile "io.reactivex:rxjava:$rxJavaVer"
+    compile "io.reactivex:rxandroid:$rxAndroidVer"
+    compile "com.squareup.retrofit2:adapter-rxjava:$rxJavaAdapterVer"
+    compile "com.squareup.retrofit2:converter-gson:$gsonConverterVer"
+    //misc
+    compile "com.afollestad.material-dialogs:core:$materialDialogVer"
+
+}
