@@ -7,4 +7,7 @@
     <string name="fetching_data">Fetching data</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="open">OPEN</string>
+    <string name="create_comment">Add comment</string>
+    <string name="create">Create</string>
+    <string name="add_comment_hint">Enter comment</string>
 </resources>

@@ -69,41 +69,32 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(view -> showInputDialog());
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         recyclerView.setLayoutManager(layoutManager);
-//        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
-//            @Override
-//            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-//                fetchData(preferences.getString("org", ""), preferences.getString("repo", ""),
-//                        ++pageNumber, null);
-//            }
-//        });
     }
 
     private void showInputDialog() {
         new MaterialDialog.Builder(this)
                 .title(R.string.enter_full_repo_name)
                 .content(R.string.empty)
-                .input(R.string.example_repo, R.string.empty, new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        MaterialDialog progressDialog = new MaterialDialog.Builder(MainActivity.this)
-                                .content(R.string.fetching_data)
-                                .progress(true, 0)
-                                .cancelable(false)
-                                .show();
-                        try {
-                            String org = input.toString().toLowerCase().trim().split("/")[0];
-                            String repo = input.toString().toLowerCase().trim().split("/")[1];
-                            preferences.edit()
-                                    .putString("org", org)
-                                    .putString("repo", repo)
-                                    .apply();
-                            fetchData(org, repo, pageNumber, progressDialog);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(MainActivity.this, "Please check the input",
-                                    Toast.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
-                        }
+                .input(R.string.example_repo, R.string.empty, (dialog, input) -> {
+                    MaterialDialog progressDialog = new MaterialDialog.Builder(MainActivity.this)
+                            .content(R.string.fetching_data)
+                            .progress(true, 0)
+                            .cancelable(false)
+                            .show();
+                    try {
+                        input = input.toString().trim().replace(" ", "");
+                        String org = input.toString().toLowerCase().trim().split("/")[0];
+                        String repo = input.toString().toLowerCase().trim().split("/")[1];
+                        preferences.edit()
+                                .putString("org", org)
+                                .putString("repo", repo)
+                                .apply();
+                        fetchData(org, repo, pageNumber, progressDialog);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this, "Please check the input",
+                                Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
                     }
                 }).show();
     }
@@ -133,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(List<Issue> issues) {
-                        recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues));
+                        recyclerView.setAdapter(new IssueAdapter(MainActivity.this, issues, apiService));
                     }
                 });
     }
